@@ -347,7 +347,7 @@ public class FileSystem {
 			if(file instanceof Document) {
 				//this file is a document, write it
 				try {
-					BufferedWriter bw = Files.newBufferedWriter(extendPath(path,file.getName()));
+					BufferedWriter bw = Files.newBufferedWriter(extendPath(path,file.getName() + "." + ((Document)file).getDocumentType().name()));
 					bw.write((String)file.getContent());
 					bw.close();
 				}catch(Exception e) {

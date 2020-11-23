@@ -8,6 +8,7 @@ public enum Op{
 	L,LE,E,NE,
 	not_contains,
 	AND, OR,
+	NOT_AND, NOT_OR,
 	not_equals;
 	public Op negate() {
 		switch (this) {
@@ -32,6 +33,14 @@ public enum Op{
 			return contains;
 		case not_equals:
 			return equals;
+		case OR:
+			return NOT_OR;
+		case AND:
+			return NOT_AND;
+		case NOT_OR:
+			return OR;
+		case NOT_AND:
+			return NOT_AND;
 		default:
 			//never reached
 			return null;

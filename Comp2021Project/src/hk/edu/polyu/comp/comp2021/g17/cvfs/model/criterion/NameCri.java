@@ -8,6 +8,6 @@ class NameCri extends Criterion{
 	}
 
 	public boolean assertCri(File file) {
-		return super.val.toString().contains(file.getName());
+		return file.getName().contains(super.val.toString());
 	}
 }

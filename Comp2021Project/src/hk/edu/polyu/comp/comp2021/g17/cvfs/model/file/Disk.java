@@ -14,8 +14,9 @@ public class Disk {
 	private Directory cwd;
 	private LinkedList<String> path;
 	private final int maxSize;
+	@SuppressWarnings("unused")
 	private int currentSize;
-	
+
 	public Disk(int size) throws InvalidArgumentException{
 		//At least 40 bytes so it can have a root directory
 		if (size <= 40) throw new InvalidArgumentException("Cannot create a disk less than 40 bytes");
@@ -114,16 +115,18 @@ public class Disk {
 	
 	/**
 	 * List all files in current working directory, but do not follow directory
+	 * @throws IllegalOperationException 
 	 */
-	public void list() throws FileNotExistException, InvalidFileNameException {
+	public void list() throws FileNotExistException, InvalidFileNameException, IllegalOperationException {
 		//TODO
 		cwd.list();
 	}
 	
 	/**
 	 * List all files in current working directory, follow the directory
+	 * @throws IllegalOperationException 
 	 */
-	public void rList() throws FileNotExistException {
+	public void rList() throws FileNotExistException, IllegalOperationException {
 		//TODO
 		cwd.rList();
 	}

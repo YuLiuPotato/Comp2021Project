@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -102,7 +101,7 @@ public class FileSystem {
 		}
 	}
 	
-	public  void newDir(String args) throws UsageException, DiskMemoryNotEnoughException {
+	public  void newDir(String args) throws UsageException, DiskMemoryNotEnoughException, FileAlreadyExistException, InvalidFileNameException {
 		Scanner sc = new Scanner(args);
 		try {
 			String name = sc.next();
@@ -115,7 +114,7 @@ public class FileSystem {
 	}
 	
 	@SuppressWarnings("resource")
-	public  void newDoc(String args) throws UsageException, DiskMemoryNotEnoughException {
+	public  void newDoc(String args) throws UsageException, DiskMemoryNotEnoughException, FileAlreadyExistException, InvalidFileNameException {
 		Scanner sc= new Scanner(args);
 		try {
 			String name = sc.next();
@@ -133,7 +132,7 @@ public class FileSystem {
 		
 	}
 	
-	public  void delete(String args) throws UsageException, FileNotExistException {
+	public  void delete(String args) throws UsageException, FileNotExistException, IllegalOperationException {
 		Scanner sc = new Scanner(args);
 		try {
 			String name = sc.next();
@@ -145,7 +144,7 @@ public class FileSystem {
 		}
 	}
 	
-	public  void rename(String args) throws UsageException, FileNotExistException, FileAlreadyExistException {
+	public  void rename(String args) throws UsageException, FileNotExistException, FileAlreadyExistException, InvalidFileNameException {
 		Scanner sc = new Scanner(args);
 		try {
 			String oldName = sc.next();
@@ -158,7 +157,7 @@ public class FileSystem {
 		}
 	}
 	
-	public  void changeDir(String args) throws  UsageException, IllegalOperationException {
+	public  void changeDir(String args) throws  UsageException, IllegalOperationException, FileNotExistException, InvalidArgumentException {
 		Scanner sc = new Scanner(args);
 		try {
 			String name = sc.next();
@@ -265,7 +264,7 @@ public class FileSystem {
 			Criterion cri = criteria.get(criName);
 			if (cri == null) throw new InvalidArgumentException("Criterion '" + criName + "' does not exist");
 			
-			ArrayList<File> files = currentDisk.getFiles();
+			ArrayList<File> files = currentDisk.getcwd().getFiles();
 			
 			for (File f : files) {
 				if(cri.assertCri(f)) System.out.println(f.toString());
@@ -286,7 +285,7 @@ public class FileSystem {
 			Criterion cri = criteria.get(criName);
 			if (cri == null) throw new InvalidArgumentException("Criterion '" + criName + "' does not exist");
 			
-			ArrayList<File> files = currentDisk.rGetFiles();
+			ArrayList<File> files = currentDisk.getcwd().rGetFiles();
 			
 			for (File f : files) {
 				if(cri.assertCri(f)) System.out.println(f.toString());

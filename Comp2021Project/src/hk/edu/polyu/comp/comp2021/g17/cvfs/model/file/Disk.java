@@ -24,7 +24,7 @@ public class Disk {
 		path = new LinkedList<>();
 		maxSize = size;
 		try {
-			root = new Directory(".",null);
+			root = new Directory("root",null);
 			currentSize += 40;
 			cwd = root;
 			path.add("/");

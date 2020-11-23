@@ -37,7 +37,8 @@ public abstract class File {
 	 * i don't know if i am correct : name != null 
 	 */
 	private boolean isNameLegal(String name){
-		//TODO
+		
+//		if (name.compareTo(".") == 0 || name.compareTo("..") == 0) return true;
 		if ( name != null && name.length() <= 10) {
 			for (int i = 0; i < name.length(); i++) {
 				if (!isLetterOrDigit(name.charAt(i)) ) {

@@ -32,13 +32,15 @@ public class FileSystem {
 	ArrayList<Disk> disks;
 	Disk currentDisk;
 	HashMap<String,Criterion> criteria;
-	ArrayList<String> commandHistory;
-	int commandPointer = -1; //points to last command
 	
 	public FileSystem() {
 		//TODO
 		//Calling constructor is when the system is entered. Interaction begins here
 		//Arguments are passed as String
+		
+		//initialization
+		disks = new ArrayList<Disk>();
+		criteria = new HashMap<String, Criterion>();
 		
 		@SuppressWarnings("resource")
 		Scanner sc = new Scanner(System.in);
@@ -46,7 +48,7 @@ public class FileSystem {
 		String args;
 		String commandPattern = "(newDisk|newDir|newDoc|delete|rename|changeDir|list|rList|newSimpleCri|newNegation|newBinaryCri|printAllCriteria"
 				+ "|search|rSearch|store|load|undo|redo)";
-		
+		 
 		while(true) {
 			try {
 				if (!sc.hasNext(commandPattern)) throw new IllegalArgumentException("Command not found");
@@ -60,11 +62,6 @@ public class FileSystem {
 						
 						m.invoke(args); //this swallows all exceptions!!!
 						
-						//Operation succeed, store the command in history
-						if (commandName.compareTo("undo") != 0 && commandName.compareTo("redo") != 0) {
-							commandHistory.add(commandName + " " + args);
-							commandPointer++;
-						}
 						
 					} catch(NoSuchMethodException e) {
 						//this exception should never be triggered
@@ -80,14 +77,20 @@ public class FileSystem {
 
 		}
 	}
-	
+
+	public FileSystem(String test) {
+		//Constructor for conducting tests
+		//initialization
+		disks = new ArrayList<Disk>();
+		criteria = new HashMap<String, Criterion>();
+	}
 	/**
 	 * create a new disk and use it as current working disk
 	 * @param args
 	 * @throws UsageException
 	 * @throws InvalidArgumentException
 	 */
-	public  void newDisk(String args) throws UsageException, InvalidArgumentException {
+	public void newDisk(String args) throws UsageException, InvalidArgumentException {
 		//parameter parsing ignores the insignificant parts
 		Scanner sc = new Scanner(args);
 		try {
@@ -112,7 +115,7 @@ public class FileSystem {
 			sc.close();
 		}
 	}
-	
+	 
 	@SuppressWarnings("resource")
 	public  void newDoc(String args) throws UsageException, DiskMemoryNotEnoughException, FileAlreadyExistException, InvalidFileNameException {
 		Scanner sc= new Scanner(args);
@@ -169,19 +172,21 @@ public class FileSystem {
 		}
 	}
 	
-	public  void list(String args) throws UsageException {
+	public  void list(String args) throws UsageException, FileNotExistException, InvalidFileNameException, IllegalOperationException {
 		Scanner sc = new Scanner(args);
 		try {
 			if (sc.hasNext()) throw new UsageException("Usage: list");
+			currentDisk.list();
 		}finally {
 			sc.close();
 		}
 	}
 	
-	public  void rList(String args) throws UsageException {
+	public  void rList(String args) throws UsageException, FileNotExistException, IllegalOperationException {
 		Scanner sc = new Scanner(args);
 		try {
 			if (sc.hasNext()) throw new UsageException("Usage: rList");
+			currentDisk.rList();
 		}finally {
 			sc.close();
 		}
@@ -328,6 +333,7 @@ public class FileSystem {
 	private void store(Directory dir, Path path) {
 		//create a directory in path
 		path = extendPath(path, dir.getName());
+		
 		try {
 			Files.createDirectory(path);
 		} catch (IOException e) {
@@ -350,14 +356,11 @@ public class FileSystem {
 			}
 			
 			else {
-				//this file is a directory, first create it
+				//this file is a directory, call create
 				try {
-					Path childPath = extendPath(path,file.getName());
-					Files.createDirectory(childPath);
 					
-					//then write the content residing in this directory
-					store((Directory)file,childPath);
-				} catch (IOException e) {
+					store((Directory)file,path);
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -386,7 +389,9 @@ public class FileSystem {
 	}
 	
 	private String getDocumentType(String extensionName) {
-		return extensionName.split("\\.")[1];
+		String[] temp = extensionName.split("\\.");
+		if (temp.length != 2) return "txt";
+		else return extensionName.split("\\.")[1];
 	}
 	
 	private String getContent(Path path) throws IOException {
@@ -416,6 +421,7 @@ public class FileSystem {
 			
 			else {
 				String extensionName = getName(p);
+				System.out.println(extensionName);
 				String docType = getDocumentType(extensionName);
 				if (!validTypes.contains(docType)) continue;
 				

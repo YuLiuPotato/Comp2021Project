@@ -18,12 +18,10 @@ class Dirent implements Iterable<File>{
 	 * @throws FileAlreadyExistException
 	 */
 	void put(String name, File f) throws FileAlreadyExistException {
-		if (name.equals(f.getName())){
-			File temp = dirent.get(name);
-			//We do not permit directory and document to share the same name
-			if (temp != null) throw new FileAlreadyExistException("File already exists.");
-			dirent.put(name, f);
-		}
+		File temp = dirent.get(name);
+		//We do not permit directory and document to share the same name
+		if (temp != null) throw new FileAlreadyExistException("File already exists.");
+		dirent.put(name, f);
 	}
 	
 	/**
@@ -71,16 +69,16 @@ public class Directory extends File{
 		// size = 40 + total size of its contained file?
 		super(FileType.Direntory, name, 40, null);
 		this.parent = parent;
-		Dirent dir = new Dirent();
-		try {
-			dir.put(".",this);
-			if(parent != null)  dir.put("..",parent);
+		this.content = new Dirent();
+		try { 
+			content.put(".",this);
+			if(parent != null)  content.put("..",parent);
 		} catch (FileAlreadyExistException e) {
 			//This exception is never triggered
 			e.printStackTrace();
 		}
-		super.content = dir; //redundant ?
-		//this.content = dir;
+		super.content = content; //redundant ?
+
 		if(this.parent != null){
 			this.parent.content.put(name,this);
 			changeSize(this.parent, this,'+');
@@ -244,7 +242,7 @@ public class Directory extends File{
 		//it is ok to print the .txt .css in this file
 		Iterator<String> it = this.content.keyIterator();
 		it.next();
-		it.next();
+		it.next(); 
 		Document temp = new Document("temp",DocumentType.txt,"");
 		int number = 0, size = 0;
 		//it.next();

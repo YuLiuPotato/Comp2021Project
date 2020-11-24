@@ -6,8 +6,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -32,6 +34,10 @@ public class FileSystem {
 	ArrayList<Disk> disks;
 	Disk currentDisk;
 	HashMap<String,Criterion> criteria;
+	public ArrayList<String> commandHistory;
+	public LinkedList<String> redoStack;
+	public int commandPtr; //points to last command
+	
 	
 	public FileSystem() {
 		//TODO
@@ -41,6 +47,9 @@ public class FileSystem {
 		//initialization
 		disks = new ArrayList<Disk>();
 		criteria = new HashMap<String, Criterion>();
+		commandHistory = new ArrayList<String>();
+		commandPtr = -1;
+		redoStack = new LinkedList<String>();
 		
 		@SuppressWarnings("resource")
 		Scanner sc = new Scanner(System.in);
@@ -48,6 +57,7 @@ public class FileSystem {
 		String args;
 		String commandPattern = "(newDisk|newDir|newDoc|delete|rename|changeDir|list|rList|newSimpleCri|newNegation|newBinaryCri|printAllCriteria"
 				+ "|search|rSearch|store|load|undo|redo)";
+
 		 
 		while(true) {
 			try {
@@ -62,6 +72,15 @@ public class FileSystem {
 						
 						m.invoke(args); //this swallows all exceptions!!!
 						
+						//regular command
+						//store the command
+						//forward the pointer
+						if (commandName.compareTo("undo") != 0 && commandName.compareTo("undo") != 0) {
+							commandHistory.add(++commandPtr, commandName + " " + args);
+						}
+						
+						//irregular command
+						//do nothing
 						
 					} catch(NoSuchMethodException e) {
 						//this exception should never be triggered
@@ -83,6 +102,9 @@ public class FileSystem {
 		//initialization
 		disks = new ArrayList<Disk>();
 		criteria = new HashMap<String, Criterion>();
+		commandHistory = new ArrayList<String>();
+		commandPtr = -1;
+		redoStack = new LinkedList<String>();
 	}
 	/**
 	 * create a new disk and use it as current working disk
@@ -443,6 +465,71 @@ public class FileSystem {
 			throw new UsageException("Usage: load <pathname>");
 		}finally {
 			sc.close();
+		}
+	}
+	
+	private Command string2Command(String commandString) {
+		for(Command c : Command.values()) {
+			if (c.name().compareTo(commandString) == 0) {
+				return c;
+			}
+		}
+		
+		//never reached
+		return null;
+	}
+	
+	
+	@SuppressWarnings("resource")
+	public void undo(String args) throws UsageException, FileNotExistException, IllegalOperationException, FileAlreadyExistException, InvalidFileNameException {
+		
+		Scanner scin = new Scanner(args);
+		if (scin.hasNext()) throw new UsageException("Usage: undo <>");
+		scin.close();
+
+		Scanner sc = new Scanner(commandHistory.get(commandPtr));
+		String command = sc.next();
+		String first, second;
+
+		switch(string2Command(command)) {
+		case newDir:
+		case newDoc:
+			this.delete(sc.next());
+			break;
+		case rename:
+			first = sc.next();
+			second = sc.next();
+			this.rename(second + " " + first);
+			break;
+		default:
+			throw new UsageException("Unsupported");	
+		}
+		
+		redoStack.push(commandHistory.get(commandPtr));
+		commandHistory.remove(commandPtr--);
+	}
+	
+	@SuppressWarnings("resource")
+	public void redo(String args) throws UsageException, DiskMemoryNotEnoughException, FileAlreadyExistException, InvalidFileNameException, FileNotExistException, IllegalOperationException {
+		Scanner scin = new Scanner(args);
+		if (scin.hasNext()) throw new UsageException("Usage: undo <>");
+		scin.close();
+
+		Scanner sc = new Scanner(redoStack.pop());
+		String command = sc.next();
+
+		switch(string2Command(command)) {
+		case newDir:
+			this.newDir(sc.nextLine());
+			break;
+		case newDoc:
+			this.newDoc(sc.nextLine());
+			break;
+		case rename:
+			this.rename(sc.nextLine());
+			break;
+		default:
+			throw new UsageException("Unsupported");	
 		}
 	}
 	

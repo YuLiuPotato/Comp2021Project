@@ -33,4 +33,23 @@ class FileSystemTest {
 			e.printStackTrace();
 		}
 	}
+	
+	@Test
+	void undoRedoTest() {
+		try {
+			fileSystem.newDisk("10000");
+			fileSystem.commandHistory.add(++fileSystem.commandPtr,"newDisk 10000");
+			fileSystem.newDir("dir1");
+			fileSystem.commandHistory.add(++fileSystem.commandPtr,"newDir dir1");
+			fileSystem.newDoc("abc txt \"haha\"");
+			fileSystem.commandHistory.add(++fileSystem.commandPtr,"newDoc abc txt \"haha\"");
+			fileSystem.list("");
+			fileSystem.undo("");
+			fileSystem.list("");
+			fileSystem.redo("");
+			fileSystem.list("");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

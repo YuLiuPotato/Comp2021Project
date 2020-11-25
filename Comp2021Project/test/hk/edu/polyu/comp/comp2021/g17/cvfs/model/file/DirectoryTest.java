@@ -109,11 +109,29 @@ class DirectoryTest {
 	void listTest() {
 		//assertTimeout(ofMillis(2000),() -> d1.list());
 		try {
+			ByteArrayOutputStream testOut = new ByteArrayOutputStream();
+			PrintStream Oriout = System.out;
+			System.setOut(new PrintStream(testOut));
 			d2.newDoc("pig", "i hate you", DocumentType.txt);
 			d2.newDir("rabbit");
 			d2.findDir("rabbit").newDoc("pigHome", "this is my home", DocumentType.txt);
 			d2.list();
 			d2.findDir("rabbit").list();
+			String expectedOut = "\n" +
+					"In directory dir2: \n" +
+					"  Document: pig | Type: Document | Size: 60\n" +
+					"  Directory: rabbit | Size: 110\n" +
+					"\n" +
+					"Total number of files: 2\n" +
+					"Total sizes of files: 170\n" +
+					"\n" +
+					"In directory rabbit: \n" +
+					"  Document: pigHome | Type: Document | Size: 70\n" +
+					"\n" +
+					"Total number of files: 1\n" +
+					"Total sizes of files: 70\n";
+			assertEquals(testOut.toString(),expectedOut);
+			System.setOut(Oriout);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -124,10 +142,22 @@ class DirectoryTest {
 	void rListTest() {
 		//assertTimeout(ofMillis(2000),() -> d1.rList());
 		try {
+			ByteArrayOutputStream testOut = new ByteArrayOutputStream();
+			PrintStream Oriout = System.out;
+			System.setOut(new PrintStream(testOut));
 			d2.newDoc("pig", "i hate you", DocumentType.txt);
 			d2.newDir("rabbit");
 			d2.findDir("rabbit").newDoc("pigHome", "this is my home", DocumentType.txt);
 			d2.rList();
+			String expectedOut = "\n"+"In directory dir2: \n" +
+					"  File: pig | Type: Document | Size: 60\n" +
+					"  Directory: rabbit | Size: 3\n" +
+					"    File: pigHome | Type: Document | Size: 70\n" +
+					"\n" +
+					"Total number of files: 3\n" +
+					"Total sizes of files: 210\n";
+			assertEquals(testOut.toString(),expectedOut);
+			System.setOut(Oriout);
 		} catch (Exception e) {
 
 		}
